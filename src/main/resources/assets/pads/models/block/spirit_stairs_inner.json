@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "ambientocclusion" : false,
+  "textures": {
+    "bottom": "pads:block/spirit_block",
+    "side": "pads:block/spirit_block",
+    "top": "pads:block/spirit_block"
+  }
+}

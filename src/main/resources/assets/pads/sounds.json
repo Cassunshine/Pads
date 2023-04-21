@@ -1,0 +1,12 @@
+{
+  "teleport": {
+    "sounds": [
+      "pads:teleport"
+    ]
+  },
+  "teleport_charge": {
+    "sounds": [
+      "pads:teleport_charge"
+    ]
+  }
+}

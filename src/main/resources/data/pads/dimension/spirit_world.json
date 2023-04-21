@@ -1,0 +1,16 @@
+{
+  "type": "pads:spirit_world",
+  "generator": {
+    "type": "flat",
+    "biome_source": {
+      "type": "fixed",
+      "biome_id": "minecraft:plains"
+    },
+    "settings": {
+      "layers": [],
+      "lakes": false,
+      "features": false,
+      "structures": []
+    }
+  }
+}
