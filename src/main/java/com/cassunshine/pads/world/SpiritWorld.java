@@ -2,9 +2,11 @@ package com.cassunshine.pads.world;
 
 import com.cassunshine.pads.PadsMod;
 import com.cassunshine.pads.multiblock.PadsMultiblocks;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
@@ -16,9 +18,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.Heightmap;
+import net.minecraft.world.*;
 import net.minecraft.world.chunk.ChunkSection;
 import org.jetbrains.annotations.NotNull;
 import xyz.nucleoid.fantasy.Fantasy;
@@ -28,6 +28,27 @@ import xyz.nucleoid.fantasy.RuntimeWorldHandle;
 import java.util.*;
 
 public class SpiritWorld {
+
+	private static final ImmutableList<BlockPos> checkPositions;
+	private static final ImmutableList<BlockPos> neighbors = new ImmutableList.Builder<BlockPos>()
+		.add(new BlockPos(1, 0, 0)).add(new BlockPos(-1, 0, 0))
+		.add(new BlockPos(0, 1, 0)).add(new BlockPos(0, -1, 0))
+		.add(new BlockPos(0, 0, 1)).add(new BlockPos(0, 0, -1))
+		.build();
+
+	private static final Random random = new Random();
+
+	static {
+		var builder = new ImmutableList.Builder<BlockPos>();
+
+		for (int x = -1; x <= 1; x++) {
+			for (int z = -1; z <= 1; z++) {
+				builder.add(new BlockPos(x, -1, z));
+			}
+		}
+
+		checkPositions = builder.build();
+	}
 
 	public final UUID ownerID;
 	public final MinecraftServer server;
@@ -147,13 +168,21 @@ public class SpiritWorld {
 
 	/**
 	 * Called when an entity uses a teleporter pad in the overworld, teleporting to this dimension
-	 *
-	 * @param entity
-	 * @param position
 	 */
-	public void useInTelepad(ServerPlayerEntity entity, BlockPos position) {
+	public void useInTelepad(List<Entity> entities, BlockPos position) {
+
+		for (int i = entities.size() - 1; i >= 0; i--) {
+			if (!(entities.get(i) instanceof ServerPlayerEntity))
+				entities.remove(i);
+		}
+
+		if (entities.size() == 0)
+			return;
+
+		var mainPlayer = entities.get(0);
+
 		//Verify teleporter pad exists in the overworld before adding it.
-		if (!PadsMultiblocks.padStructure.verify(server.getOverworld(), position))
+		if (!PadsMultiblocks.padStructureWithStone.verify(server.getOverworld(), position))
 			throw new IllegalStateException("No teleporter pad found at " + position + " in the overworld");
 
 		//Create a new teleporter pad data for this position in the overworld, if none exists.
@@ -169,7 +198,20 @@ public class SpiritWorld {
 
 		var pairedPad = overworldMap.get(position);
 
-		entity.teleport(actualWorld, pairedPad.spiritWorldPosition.getX() + 0.5f, pairedPad.spiritWorldPosition.getY() + 2, pairedPad.spiritWorldPosition.getZ() + 0.5f, entity.getYaw(), entity.getPitch());
+		//No fuel! Oopsies. Also, ignore creative players.
+		if (/*entity.interactionManager.getGameMode() != GameMode.CREATIVE &&*/ !verifyAndUseFuel(mainPlayer.getWorld(), position))
+			return;
+
+		for (Entity entity : entities) {
+			if (!(entity instanceof ServerPlayerEntity pent))
+				continue;
+
+			var offset = pent.getPos().subtract(position.ofCenter());
+			offset = offset.add(pairedPad.spiritWorldPosition.ofCenter());
+
+			SpiritWorldManager.addEntityData(pent, this);
+			pent.teleport(actualWorld, offset.getX(), offset.getY(), offset.getZ(), entity.getYaw(), entity.getPitch());
+		}
 	}
 
 
@@ -184,6 +226,71 @@ public class SpiritWorld {
 		entity.teleport(server.getOverworld(), pairedPad.overworldPosition.getX() + 0.5f, pairedPad.overworldPosition.getY() + 2, pairedPad.overworldPosition.getZ() + 0.5f, entity.getYaw(), entity.getPitch());
 	}
 
+	private boolean verifyAndUseFuel(World sourceWorld, BlockPos padCenter) {
+
+		//Try for obsidian or crying obsidian first.
+		var tmpList = new ArrayList<>(checkPositions);
+		Collections.shuffle(tmpList);
+
+		for (BlockPos pos : checkPositions) {
+			var finalPos = pos.add(padCenter);
+			var blockState = sourceWorld.getBlockState(finalPos);
+
+			//If it's a crying obsidian, we have fuel!
+			if (blockState.getBlock() == Blocks.CRYING_OBSIDIAN) {
+				//5% chance to turn crying obsidian to obsidian.
+				maybeConsume(sourceWorld, 0.05f, finalPos, Blocks.OBSIDIAN.getDefaultState());
+				return true;
+			} else if (blockState.getBlock() == Blocks.OBSIDIAN) {
+				//Obsidian isn't fuel, but it can connect us to fuel!
+				if (findConnectedFuel(sourceWorld, finalPos))
+					return true;
+			}
+		}
+
+		//No crying obsidian found... So we randomly steal a gold block instead! Whichever one we checked first for obsidian.
+		// The gold goes to the fox dimension >:3
+
+		//50% chance!!! Use crying obsidian instead please.
+		maybeConsume(sourceWorld, 0.5f, padCenter.add(tmpList.get(0)).add(0, 1, 0), Blocks.STONE.getDefaultState());
+		return true;
+	}
+
+	private boolean findConnectedFuel(World sourceWorld, BlockPos startPosition) {
+		var list = new ArrayList<BlockPos>();
+		var searched = new HashSet<BlockPos>();
+		var iterations = 0;
+
+		list.add(startPosition);
+
+		while (iterations++ < 2000 && list.size() > 0) {
+			var curr = list.remove(0);
+
+			for (BlockPos neighbor : neighbors) {
+				var f = neighbor.add(curr);
+
+				if (searched.contains(f))
+					continue;
+
+				var state = sourceWorld.getBlockState(f);
+
+				if (state.getBlock() == Blocks.CRYING_OBSIDIAN) {
+					maybeConsume(sourceWorld, 0.05f, f, Blocks.OBSIDIAN.getDefaultState());
+					return true;
+				} else if (state.getBlock() == Blocks.OBSIDIAN) {
+					searched.add(f);
+					list.add(f);
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private void maybeConsume(World sourceWorld, float chance, BlockPos pos, BlockState newState) {
+		if (random.nextFloat() <= chance)
+			sourceWorld.setBlockState(pos, newState);
+	}
 
 	private void rebuildWorld() {
 		//Clear out the existing world data...
@@ -209,7 +316,7 @@ public class SpiritWorld {
 		for (int i = allDiscoveredPads.size() - 1; i >= 0; i--) {
 			var pad = allDiscoveredPads.get(i);
 
-			if(PadsMultiblocks.padStructure.verify(server.getOverworld(), pad.overworldPosition))
+			if (PadsMultiblocks.padStructure.verify(server.getOverworld(), pad.overworldPosition))
 				continue;
 
 			allDiscoveredPads.remove(i);

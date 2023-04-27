@@ -3,6 +3,7 @@ package com.cassunshine.pads;
 import com.cassunshine.pads.accessors.IPadUser;
 import com.cassunshine.pads.block.PadsBlocks;
 import com.cassunshine.pads.multiblock.PadsMultiblocks;
+import com.cassunshine.pads.multiblock.TelepadMultiblockStructure;
 import com.cassunshine.pads.world.SpiritWorld;
 import com.cassunshine.pads.world.SpiritWorldManager;
 import net.minecraft.entity.Entity;
@@ -63,33 +64,33 @@ public class PadsMod implements ModInitializer {
 	}
 
 	private static void evalOverworldPlayer(ServerWorld overworld, ServerPlayerEntity entity) {
-		if (!useTelepad(overworld, entity)) return;
+		if (!useTelepad(PadsMultiblocks.padStructure, overworld, entity)) return;
 
 		PadsMod.runAtEndOfTick.add(() -> SpiritWorldManager.moveToSpiritWorld(entity, SpiritWorldManager.getSpiritWorld(entity)));
 	}
 
 	private static void evalSpiritWorldPlayer(SpiritWorld world, ServerPlayerEntity entity) {
-		if (!useTelepad(world.actualWorld, entity)) return;
+		if (!useTelepad(PadsMultiblocks.padStructureWithStone, world.actualWorld, entity)) return;
+
+		if (entity.getPos().y < -30) entity.teleport(entity.getX(), world.actualWorld.getTopY(), entity.getZ());
 
 		PadsMod.runAtEndOfTick.add(() -> SpiritWorldManager.leaveSpiritWorld(entity));
 	}
 
 
-	private static boolean useTelepad(World world, ServerPlayerEntity entity) {
+	private static boolean useTelepad(TelepadMultiblockStructure structure, World world, ServerPlayerEntity entity) {
 
 		IPadUser user = (IPadUser) entity;
 
-		if (entity.getPos().y < -30) entity.teleport(entity.getX(), world.getTopY(), entity.getZ());
-
 		//Verify sneaking
-		if (entity.isSneaking()) {
+		if (!entity.isSneaking()) {
 			user.setPadTicks(-40);
 			return false;
 		}
 
 		//Verify telepad multiblock
 		var feetPos = entity.getBlockPos().add(0, -1, 0);
-		if (!PadsMultiblocks.padStructure.verify(world, feetPos)) {
+		if (!structure.verify(world, feetPos)) {
 			user.setPadTicks(-40);
 			return false;
 		}

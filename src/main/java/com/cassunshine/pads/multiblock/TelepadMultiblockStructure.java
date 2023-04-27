@@ -10,13 +10,22 @@ import java.util.function.Function;
 
 public class TelepadMultiblockStructure extends MultiblockStructure {
 
-	private final ImmutableSet<Block> padBlocks = new ImmutableSet.Builder<Block>()
-		.add(Blocks.GOLD_BLOCK)
-		.add(Blocks.RAW_GOLD_BLOCK)
-		.build();
+	private final ImmutableSet<Block> padBlocks;
 
-	public TelepadMultiblockStructure() {
+	public TelepadMultiblockStructure(boolean includeStone) {
 		super();
+
+		{
+			var builder = new ImmutableSet.Builder<Block>()
+				.add(Blocks.GOLD_BLOCK)
+				.add(Blocks.RAW_GOLD_BLOCK);
+
+			if (includeStone)
+				builder = builder.add(Blocks.STONE);
+
+			padBlocks = builder.build();
+		}
+
 		var builder = new ImmutableList.Builder<Pair<BlockPos, Function<BlockState, Boolean>>>();
 
 		for (int x = -2; x <= 2; x++) {

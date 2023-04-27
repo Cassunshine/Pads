@@ -6,6 +6,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
+import net.minecraft.util.math.Box;
 import net.minecraft.world.GameMode;
 
 import java.util.HashMap;
@@ -117,19 +118,18 @@ public class SpiritWorldManager {
 	}
 
 	public static void moveToSpiritWorld(ServerPlayerEntity entity, SpiritWorld world) {
-		var data = new EntityData();
-		data.entityId = entity.getUuid();
-		data.currentSpiritWorld = world;
-		data.previousMode = entity.interactionManager.getGameMode();
-		data.prevInvul = entity.isInvulnerable();
+		var padPos = entity.getBlockPos().add(0, -1, 0);
+		var bounds = new Box(
+			padPos.add(-2, 0, -2),
+			padPos.add(2, 4, 2)
+		);
+		var entities = entity.getWorld().getOtherEntities(entity, bounds);
 
-		entity.setInvulnerable(true);
-		entity.changeGameMode(GameMode.ADVENTURE);
-
-		entitiesInWorlds.put(entity.getUuid(), data);
+		entities.add(0, entity);
 
 		//TODO - Block Pos Fix
-		world.useInTelepad(entity, entity.getBlockPos().add(0, -1, 0));
+
+		world.useInTelepad(entities, entity.getBlockPos().add(0, -1, 0));
 	}
 
 	public static void leaveSpiritWorld(ServerPlayerEntity entity) {
@@ -141,6 +141,20 @@ public class SpiritWorldManager {
 		entity.changeGameMode(data.previousMode);
 
 		data.currentSpiritWorld.useOutTelepad(entity, entity.getBlockPos().add(0, -1, 0));
+	}
+
+
+	public static void addEntityData(ServerPlayerEntity entity, SpiritWorld world) {
+		var data = new EntityData();
+		data.entityId = entity.getUuid();
+		data.currentSpiritWorld = world;
+		data.previousMode = entity.interactionManager.getGameMode();
+		data.prevInvul = entity.isInvulnerable();
+
+		entity.setInvulnerable(true);
+		entity.changeGameMode(GameMode.ADVENTURE);
+
+		entitiesInWorlds.put(entity.getUuid(), data);
 	}
 
 
