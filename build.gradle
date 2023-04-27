@@ -36,6 +36,7 @@ dependencies {
 	modImplementation libs.quilted.fabric.api
 	// modImplementation libs.bundles.quilted.fabric.api // If you wish to use Fabric API's deprecated modules, you can replace the above line with this one
 	modImplementation 'xyz.nucleoid:fantasy:0.4.9+1.19.4-rc2'
+	include 'xyz.nucleoid:fantasy:0.4.9+1.19.4-rc2'
 }
 
 processResources {
