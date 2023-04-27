@@ -5,6 +5,8 @@ A fast travel mod for minecraft, based on the game [TUNIC's](https://store.steam
 
 As such, there are **MILD** spoilers for some of TUNIC's primary mechanics & story elements. I'll avoid talking about how Pads pulls from TUNIC, but I would highly recommend anyone who enjoys this mod play the game, too!~
 
+[MODRINTH PAGE FOR DOWNLOADS](https://modrinth.com/)
+
 ### ~ How it works ~
 Pads uses a simple, affordable fast travel system. 
 
