@@ -24,5 +24,5 @@ Pads uses a simple, affordable fast travel system.
 
 * Pads is a ***Quilt Exclusive*** mod! Official ports to other platforms will not be made! <sub>Though I'm not against unofficial ports.</sub>
 * Pads uses [QFAPI](https://modrinth.com/mod/qsl). At time of writing, it's made for 5.0.0~
-* Pads is made for Minecraft 1.19.3, but 1.19.4 should work too! Updates will (hopefully) come out as Minecraft & Quilt update!
+* Pads is made for Minecraft 1.19.3 or 1.19.4! Updates will (hopefully) come out as Minecraft & Quilt update!
 * Pads needs people to use it! Mod can't work if there's nobody using it!
