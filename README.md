@@ -1,29 +1,26 @@
-# Quilt Template Mod
+![Pad Icon](https://i.imgur.com/F42Uhy0.png)
+# ~ Pads ~
 
-The official Quilt template mod. You can use it as a template for your own mods!
+A fast travel mod for minecraft, based on the game [TUNIC's](https://store.steampowered.com/app/553420/TUNIC/) fast travel system.
 
-## Usage
+As such, there are **MILD** spoilers for some of TUNIC's primary mechanics & story elements. I'll avoid talking about how Pads pulls from TUNIC, but I would highly reccomend anyone who enjoys this mod play the game, too!~
 
-In order to use this mod as a template:
+### ~ How it works ~
+Pads uses a simple, affordable fast travel system. 
 
-1. Create a new repository from this template with `Use this template`
-2. Clone the recently-created repo on your PC
-3. Make the necessary changes in order to make it yours:
-    - Update `gradle.properties` in order to use your Maven group and mod ID
-        - If you don't know which Maven group to use, and you are planning to host the mod's source code on GitHub, use `io.github.<Your_Username_Here>`
-    - Update `quilt.mod.json` in order to reflect your mod's metadata
-        - If you are planning to include (jar-in-jar) a mod, don't forget to declare its dependency on it!
-        - The icon provided here is a placeholder one. If you aren't able to replace it yet, you can delete it and remove the "icon" property
-    - Create a LICENSE file for this mod! If you don't know which license to use, check out [here](https://choosealicense.com/).
-        - If you use `LICENSE.md`, don't forget to update the buildscript in order to use that file name!
-        - In `quilt.mod.json`, don't forget to put the license's [SPDX identifier](https://spdx.org/licenses/) under the `"license"` property in `"metadata"`.
-        - The GPLv3 and AGPLv3 are not valid mod licenses, so you can use almost any license except for those.
-    - Update the Java sub-directory structure so it reflects your Maven group
-    - If the dependencies on `gradle/libs.versions.toml` isn't up-to-date, feel free to update them! The [linked utility](https://lambdaurora.dev/tools/import_quilt.html) should help you in this easy and quick process.
-4. The mod is now ready to be worked on!
+* ***To build a pad***, simply place down a 3x3 of gold blocks, and surround it with any combination of slabs and stairs. Should even work with modded blocks, in theory!
 
-## License
+* ***To use a pad***, stand on the center gold block, and hold shift. After a few seconds, you'll be teleported to the Spirit World. Each spirit world is unique, per player. You can't die in the spirit world! If you fall off the world you just get teleported back up to the top of the world, and you can't take damage. I would recommend keeping pearls and/or elytra on hand though, you can get stuck in blocks sometimes because random generation, and you can't break or place any blocks in the spirit world.
 
-This template on the QuiltMC GitHub is licensed under the [Creative Common Zero v1.0 license](./LICENSE-TEMPLATE.md).
+* ***Pads use fuel!*** If you use a teleporter pad, one of the gold blocks has a 50% chance to turn to stone! You can either let this happen and just replace it with gold again (lame) or use crying obsidian as a fuel source (cool!). Every time you use a teleporter pad, it will search directly below the gold blocks for crying obsidian. If it finds some, it has a 5% chance of turning it to normal obsidian. If it doesn't find anything, it falls back to the gold.
 
-Mods created with this template are not automatically licensed under the CC0, and are not required to give any kind of credit back to QuiltMC for this template.
+* ***All pads that you've ever used will be placed in the spirit world***, connected to other pads by paths of spirit blocks. The spirit blocks around a pad in the spirit world match the fully solid blocks around it in the overworld, so you can get a rough idea of where each teleporter pad goes. They tend to move around a little when you discover new teleporter pads, because of the way they're stitched together, so keep that in mind, too!
+
+* ***You CAN visit other player's spirit worlds...*** But I won't tell you how!~ Experiment, and find out :3
+
+### ~ What it needs ~
+
+* Pads is a ***Quilt Exclusive*** mod! Official ports to other platforms will not be made! <sub>Though I'm not against unofficial ports.</sub>
+* Pads uses [QFAPI](https://modrinth.com/mod/qsl). At time of writing, it's made for 5.0.0~
+* Pads is made for Minecraft 1.19.3, but 1.19.4 should work too! Updates will (hopefully) come out as Minecraft & Quilt update!
+* Pads needs people to use it! Mod can't work if there's nobody using it!
