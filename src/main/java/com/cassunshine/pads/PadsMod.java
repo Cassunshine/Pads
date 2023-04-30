@@ -70,9 +70,9 @@ public class PadsMod implements ModInitializer {
 	}
 
 	private static void evalSpiritWorldPlayer(SpiritWorld world, ServerPlayerEntity entity) {
-		if (!useTelepad(PadsMultiblocks.padStructureWithStone, world.actualWorld, entity)) return;
-
 		if (entity.getPos().y < -30) entity.teleport(entity.getX(), world.actualWorld.getTopY(), entity.getZ());
+
+		if (!useTelepad(PadsMultiblocks.padStructureWithStone, world.actualWorld, entity)) return;
 
 		PadsMod.runAtEndOfTick.add(() -> SpiritWorldManager.leaveSpiritWorld(entity));
 	}
